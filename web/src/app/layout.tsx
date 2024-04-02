@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { theme } from "../theme";
 import "./globals.css";
+import "@mantine/dropzone/styles.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -28,9 +29,7 @@ export default function RootLayout({
         />
       </head>
       <body>
-          <MantineProvider theme={theme}>
-              {children}
-          </MantineProvider>
+        <MantineProvider theme={theme}>{children}</MantineProvider>
       </body>
     </html>
   );

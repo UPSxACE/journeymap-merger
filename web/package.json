@@ -10,10 +10,13 @@
   },
   "dependencies": {
     "@mantine/core": "^7.7.1",
+    "@mantine/dropzone": "^7.7.1",
     "@mantine/hooks": "^7.7.1",
+    "axios": "^1.6.8",
     "next": "^14.2.0-canary.45",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "react-icons": "^5.0.1"
   },
   "devDependencies": {
     "@types/node": "^20",

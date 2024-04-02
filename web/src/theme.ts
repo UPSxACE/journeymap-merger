@@ -2,17 +2,18 @@
 
 import { MantineColorsTuple, createTheme } from "@mantine/core";
 
+// Deep Blue
 const mainColor: MantineColorsTuple = [
-    "#fff4e2",
-    "#ffe9cc",
-    "#ffd09c",
-    "#fdb766",
-    "#fca13a",
-    "#fb931d",
-    "#fc8c0c",
-    "#e17900",
-    "#c86a00",
-    "#ae5a00"
+  "#ebefff",
+  "#d5dafc",
+  "#a9b1f1",
+  "#7b87e9",
+  "#5362e1",
+  "#3a4bdd",
+  "#2d3fdc",
+  "#1f32c4",
+  "#182cb0",
+  "#0b259c",
 ];
 
 export const theme = createTheme({
