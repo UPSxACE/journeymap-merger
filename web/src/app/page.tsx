@@ -7,7 +7,6 @@ import {
   DropzoneIdle,
   DropzoneReject,
   FileWithPath,
-  IMAGE_MIME_TYPE,
 } from "@mantine/dropzone";
 import Image from "next/image";
 import { useState } from "react";
@@ -51,7 +50,7 @@ export default function Home() {
       <h1 className="m-0 font-medium">Minecraft JourneyMap Merger</h1>
       <Paper className="flex flex-col gap-4 rounded-xl p-4" withBorder>
         <Dropzone
-          accept={IMAGE_MIME_TYPE}
+          accept={["image/png"]}
           onDrop={setFiles}
           onReject={(files) => console.log("rejected files", files)}
           maxSize={5 * 1024 ** 2}
