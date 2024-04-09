@@ -1,10 +1,12 @@
 import { ColorSchemeScript, MantineProvider } from "@mantine/core";
 import "@mantine/core/styles.css";
+import "@mantine/dropzone/styles.css";
+import { Notifications } from "@mantine/notifications";
+import "@mantine/notifications/styles.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { theme } from "../theme";
 import "./globals.css";
-import "@mantine/dropzone/styles.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -29,7 +31,10 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <MantineProvider theme={theme}>{children}</MantineProvider>
+        <MantineProvider theme={theme}>
+          <Notifications position="bottom-left" zIndex={1000} limit={5} />
+          {children}
+        </MantineProvider>
       </body>
     </html>
   );
