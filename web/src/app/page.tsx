@@ -1,63 +1,118 @@
 "use client";
-import merge from "@/actions/merge";
-import { convertBytes } from "@/utils/convert-bytes";
-import { Button, Paper } from "@mantine/core";
+import { Paper } from "@mantine/core";
 import {
   Dropzone,
   DropzoneAccept,
   DropzoneIdle,
   DropzoneReject,
+  FileRejection,
   FileWithPath,
 } from "@mantine/dropzone";
 import { notifications } from "@mantine/notifications";
-import Image from "next/image";
+import axios from "axios";
+import imageCompression from "browser-image-compression";
 import { useState } from "react";
 import DropzoneLayout from "./_components/dropzone-layout";
+import Previews from "./_components/previews";
+import Result from "./_components/result";
 
 export default function Home() {
   const [files, setFiles] = useState<FileWithPath[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [finalFile, setFinalFile] = useState<null | string>(null);
+  const [compressedFile, setCompressedFile] = useState<null | string>(null);
 
   function handleMerge() {
+    setLoading(true);
     const form = new FormData();
 
     files.map((file) => {
       form.append("file", file);
     });
 
-    merge(form);
+    axios
+      .post("http://localhost:1323/merge", form, {
+        responseType: "arraybuffer",
+      })
+      .then((res) => {
+        const blob = new Blob([res.data], {
+          type: "image/png",
+        });
+        const urlObject = URL.createObjectURL(blob);
+
+        setFinalFile(urlObject);
+
+        const fileObj = new File([blob], "compressed.png", { type: blob.type });
+
+        imageCompression(fileObj, {
+          maxWidthOrHeight: 4000,
+          initialQuality: 1.0,
+          alwaysKeepResolution: true,
+        })
+          .then((compressed) => {
+            const urlObject = URL.createObjectURL(compressed);
+            setCompressedFile(urlObject);
+          })
+          .catch((err) => {
+            notifications.show({
+              title: "Unexpected error",
+              message: "The resulting file is probably too big",
+              color: "red.9",
+              autoClose: 7500,
+            });
+          });
+      })
+      .catch((error) => {
+        const errorTitle =
+          error?.response?.status === 400 ? "Invalid file" : "Unexpected error";
+        const errorMessage =
+          error?.response?.status === 400
+            ? "Check if the files have the correct name"
+            : "Please try again later";
+
+        notifications.show({
+          title: errorTitle,
+          message: errorMessage,
+          color: "red.9",
+          autoClose: 7500,
+        });
+        setLoading(false);
+      });
   }
 
-  const previews = files.map((file, index) => {
-    const imageUrl = URL.createObjectURL(file);
-    return (
-      <Paper
-        withBorder
-        key={index}
-        className="grid grid-cols-[3rem_auto] gap-x-3 gap-y-1 p-2"
-      >
-        <div className="relative aspect-square w-12 overflow-hidden rounded-[0.25rem] bg-gray-200">
-          <Image
-            className=" object-cover"
-            fill
-            alt="uploaded image preview"
-            src={imageUrl}
-            onLoad={() => URL.revokeObjectURL(imageUrl)}
-          />
-        </div>
-        <div>
-          <h1 className="m-0 line-clamp-1 text-base">{file.name}</h1>
-          <span className="m-0 block text-mantine-dimmed">
-            {convertBytes(file.size)}
-          </span>
-        </div>
-      </Paper>
-    );
-  });
+  function handleReset() {
+    finalFile && URL.revokeObjectURL(finalFile);
+    compressedFile && URL.revokeObjectURL(compressedFile);
+    setFinalFile(null);
+    setCompressedFile(null);
+    setLoading(false);
+  }
+
+  function handleFileReject(files: FileRejection[]) {
+    files.forEach((file) => {
+      let error;
+
+      if (file.file.type !== "image/png") {
+        error = "File is not a .png file";
+      }
+
+      if (file.file.size > 5 * 1024 ** 2) {
+        error = "File is bigger than 5MB";
+      }
+
+      notifications.show({
+        title: error || `File rejected`,
+        message: `Could not upload ${file.file.name}`,
+        color: "red.9",
+        autoClose: 7500,
+      });
+    });
+  }
 
   return (
     <main className="flex min-h-screen w-screen flex-col items-center justify-center gap-4 bg-mantine-gray-1">
       <Paper
-        className="flex max-w-[625px] flex-col gap-4 rounded-xl p-12 pt-8"
+        className="flex max-w-[625px] flex-col gap-4 rounded-xl p-12 pt-8 max-[625px]:max-w-full"
         withBorder
       >
         <h1 className="m-0 text-center text-2xl font-medium">
@@ -67,48 +122,36 @@ export default function Home() {
           Go to the mod folder, and drag the split map images into the square
           below.
         </p>
-        <Dropzone
-          accept={["image/png"]}
-          onDrop={setFiles}
-          onReject={(files) => {
-            files.forEach((file) => {
-              let error;
-
-              if (file.file.type !== "image/png") {
-                error = "File is not a .png file";
-              }
-
-              if (file.file.size > 5 * 1024 ** 2) {
-                error = "File is bigger than 5MB";
-              }
-
-              notifications.show({
-                title: error || `File rejected`,
-                message: `Could not upload ${file.file.name}`,
-                color: "red.9",
-                autoClose: 7500,
-              });
-            });
-          }}
-          maxSize={5 * 1024 ** 2}
-          className="!px-10"
-        >
-          <DropzoneAccept>
-            <DropzoneLayout state="accept" />
-          </DropzoneAccept>
-          <DropzoneReject>
-            <DropzoneLayout state="reject" />
-          </DropzoneReject>
-          <DropzoneIdle>
-            <DropzoneLayout state="idle" />
-          </DropzoneIdle>
-        </Dropzone>
-        {previews.length > 0 && (
+        {compressedFile && finalFile ? (
+          <Result
+            compressedFile={compressedFile}
+            handleReset={handleReset}
+            finalFile={finalFile}
+          />
+        ) : (
           <>
-            <div className="hidescroll flex max-h-[320px] flex-col gap-2 overflow-y-auto">
-              {previews}
-            </div>
-            <Button onClick={handleMerge}>Merge</Button>
+            <Dropzone
+              accept={["image/png"]}
+              onDrop={setFiles}
+              onReject={handleFileReject}
+              maxSize={5 * 1024 ** 2}
+              className="!px-10"
+            >
+              <DropzoneAccept>
+                <DropzoneLayout state="accept" />
+              </DropzoneAccept>
+              <DropzoneReject>
+                <DropzoneLayout state="reject" />
+              </DropzoneReject>
+              <DropzoneIdle>
+                <DropzoneLayout state="idle" />
+              </DropzoneIdle>
+            </Dropzone>
+            <Previews
+              files={files}
+              loading={loading}
+              handleMerge={handleMerge}
+            />
           </>
         )}
       </Paper>

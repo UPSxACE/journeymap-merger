@@ -1,3 +1,4 @@
+"use client";
 import { IoMdImage } from "react-icons/io";
 import { MdOutlineFileUpload } from "react-icons/md";
 import { RxCross2 } from "react-icons/rx";

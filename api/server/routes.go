@@ -133,16 +133,16 @@ func (s *Server) postMergeRoute(c echo.Context) error {
 		images[x][y] = img
 	}
 
-	fmt.Println(biggestX, biggestY)
-	fmt.Println(smallestX, smallestY)
+	// fmt.Println(biggestX, biggestY)
+	// fmt.Println(smallestX, smallestY)
 
 	dname, err := os.MkdirTemp("", "jm-temp")
 	if err != nil {
 		fmt.Println(err)
 		return c.NoContent(http.StatusInternalServerError)
 	}
-	fmt.Println(dname)
-	// defer os.RemoveAll(dname) // FIXME uncomment to delete temp folder after used
+	// fmt.Println(dname)
+	defer os.RemoveAll(dname)
 
 	totalW := (biggestX - smallestX + 1) * 512
 	totalH := (biggestY - smallestY + 1) * 512
@@ -163,7 +163,9 @@ func (s *Server) postMergeRoute(c echo.Context) error {
 		}
 	}
 
-	newFile, err := os.Create(filepath.Join(dname, "final.png"))
+	fileDir := filepath.Join(dname, "final.png")
+
+	newFile, err := os.Create(fileDir)
 	if err != nil {
 		fmt.Println(err)
 		return c.NoContent(http.StatusInternalServerError)
@@ -176,5 +178,5 @@ func (s *Server) postMergeRoute(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	return c.NoContent(http.StatusOK)
+	return c.File(fileDir)
 }
