@@ -1,5 +1,5 @@
 "use client";
-import { Paper } from "@mantine/core";
+import { Loader, Paper } from "@mantine/core";
 import {
   Dropzone,
   DropzoneAccept,
@@ -12,9 +12,14 @@ import { notifications } from "@mantine/notifications";
 import axios from "axios";
 import imageCompression from "browser-image-compression";
 import { useState } from "react";
+import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import DropzoneLayout from "./_components/dropzone-layout";
+import FakeProgress from "./_components/fake-progress";
+import HelpMe from "./_components/help-me";
 import Previews from "./_components/previews";
 import Result from "./_components/result";
+
+let id = 0;
 
 export default function Home() {
   const [files, setFiles] = useState<FileWithPath[]>([]);
@@ -23,6 +28,20 @@ export default function Home() {
   const [compressedFile, setCompressedFile] = useState<null | string>(null);
 
   function handleMerge() {
+    const notificationId = "merging-" + ++id;
+    console.log(notificationId);
+    notifications.show({
+      id: notificationId,
+      title: "Merging...",
+      message: <FakeProgress initial={0} final={66} />,
+      classNames: {
+        icon: "bg-transparent mr-3 mt-1",
+      },
+      icon: <Loader size={30} />,
+      withCloseButton: false,
+      autoClose: false,
+    });
+
     setLoading(true);
     const form = new FormData();
 
@@ -31,7 +50,7 @@ export default function Home() {
     });
 
     axios
-      .post("http://localhost:1323/merge", form, {
+      .post("http://localhost:1323/api/merge", form, {
         responseType: "arraybuffer",
       })
       .then((res) => {
@@ -52,12 +71,29 @@ export default function Home() {
           .then((compressed) => {
             const urlObject = URL.createObjectURL(compressed);
             setCompressedFile(urlObject);
+
+            notifications.update({
+              id: notificationId,
+              title: "Done!",
+              message: <FakeProgress initial={100} final={100} />,
+              icon: <FaCheckCircle size={30} color="green" />,
+              // autoClose: 5000,
+              classNames: {
+                root: "max-sm:hidden",
+                icon: "bg-white mt-1 mr-3",
+              },
+              autoClose: 5000,
+            });
           })
           .catch((err) => {
-            notifications.show({
+            notifications.update({
+              id: notificationId,
               title: "Unexpected error",
               message: "The resulting file is probably too big",
-              color: "red.9",
+              icon: <FaTimesCircle size={30} color="red" />,
+              classNames: {
+                icon: "bg-white mt-1 mr-3",
+              },
               autoClose: 7500,
             });
           });
@@ -70,10 +106,14 @@ export default function Home() {
             ? "Check if the files have the correct name"
             : "Please try again later";
 
-        notifications.show({
+        notifications.update({
+          id: notificationId,
           title: errorTitle,
           message: errorMessage,
-          color: "red.9",
+          icon: <FaTimesCircle size={30} color="red" />,
+          classNames: {
+            icon: "bg-white mt-1 mr-3",
+          },
           autoClose: 7500,
         });
         setLoading(false);
@@ -103,7 +143,10 @@ export default function Home() {
       notifications.show({
         title: error || `File rejected`,
         message: `Could not upload ${file.file.name}`,
-        color: "red.9",
+        icon: <FaTimesCircle size={30} color="red" />,
+        classNames: {
+          icon: "bg-white mt-1 mr-3",
+        },
         autoClose: 7500,
       });
     });
@@ -111,6 +154,8 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen w-screen flex-col items-center justify-center gap-4 bg-mantine-gray-1">
+      <HelpMe />
+
       <Paper
         className="flex max-w-[625px] flex-col gap-4 rounded-xl p-12 pt-8 max-[625px]:max-w-full"
         withBorder

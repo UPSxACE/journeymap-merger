@@ -33,7 +33,7 @@ func (s *Server) setRoutes(devMode bool) {
 	s.router.GET("/ping", func(c echo.Context) error {
 		return c.JSON(200, "pong")
 	})
-	s.router.POST("/merge", s.postMergeRoute)
+	s.router.POST("/api/merge", s.postMergeRoute)
 
 	// SECTION - Guest Routes
 
