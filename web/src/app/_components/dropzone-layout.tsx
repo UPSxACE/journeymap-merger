@@ -25,7 +25,7 @@ export default function DropzoneLayout({
 
         {state === "idle" && <IoMdImage className="text-mantine-dimmed" />}
       </div>
-      <div>
+      <div className="max-sm:hidden">
         <h1 className={"m-0 mb-1 text-lg font-normal " + getTextColor()}>
           Drag images here or click to select files
         </h1>

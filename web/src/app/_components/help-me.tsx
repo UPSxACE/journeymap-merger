@@ -9,7 +9,7 @@ export default function HelpMe() {
 
   function Mark({ children }: { children: ReactNode }) {
     return (
-      <mark className="bg-gray-200 px-[0.25rem] py-[0.0.75rem]">
+      <mark className="bg-gray-200 px-[0.25rem] pb-[0.1rem] pt-[0.05rem]">
         {children}
       </mark>
     );

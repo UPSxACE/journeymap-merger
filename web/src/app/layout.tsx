@@ -1,3 +1,4 @@
+import SingleThemeScript from "@/components/single-theme-script";
 import { ColorSchemeScript, MantineProvider } from "@mantine/core";
 import "@mantine/core/styles.css";
 import "@mantine/dropzone/styles.css";
@@ -21,9 +22,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" data-mantine-color-scheme="light">
       <head>
-        <ColorSchemeScript />
+        <ColorSchemeScript
+          defaultColorScheme="light"
+          forceColorScheme="light"
+        />
+        <SingleThemeScript />
         <link rel="shortcut icon" href="/favicon.svg" />
         <meta
           name="viewport"
@@ -31,7 +36,11 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <MantineProvider theme={theme}>
+        <MantineProvider
+          theme={theme}
+          defaultColorScheme="light"
+          forceColorScheme="light"
+        >
           <Notifications position="bottom-left" zIndex={1000} limit={5} />
           {children}
         </MantineProvider>

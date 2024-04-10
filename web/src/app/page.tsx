@@ -50,7 +50,7 @@ export default function Home() {
     });
 
     axios
-      .post("http://localhost:1323/api/merge", form, {
+      .post(String(process.env.NEXT_PUBLIC_MERGEAPI_URL), form, {
         responseType: "arraybuffer",
       })
       .then((res) => {
@@ -153,11 +153,11 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen w-screen flex-col items-center justify-center gap-4 bg-mantine-gray-1">
+    <main className="flex min-h-screen w-screen flex-col items-center justify-center gap-4 bg-mantine-gray-1 p-2">
       <HelpMe />
 
       <Paper
-        className="flex max-w-[625px] flex-col gap-4 rounded-xl p-12 pt-8 max-[625px]:max-w-full"
+        className="flex max-w-[625px] flex-col gap-4 rounded-xl p-6  pt-8 max-[625px]:max-w-full sm:p-12"
         withBorder
       >
         <h1 className="m-0 text-center text-2xl font-medium">
